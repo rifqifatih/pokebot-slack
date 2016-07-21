@@ -2,5 +2,7 @@
     "auth_service": "google",
     "username": "example@gmail.com",
     "password": "password11!!",
-    "location": "New York"
+    "latitude": 0.0,
+    "longitude": 0.0,
+    "slack_token": "xoxb-1234567890qwertyuiop"
 }
