@@ -34,6 +34,7 @@ import random
 import logging
 import requests
 import argparse
+import requests
 
 from pgoapi import PGoApi
 from pgoapi.utilities import f2i, h2f
@@ -47,6 +48,7 @@ from slackclient import SlackClient
 log = logging.getLogger(__name__)
 
 previous_spawn = []
+pokemon_names = {}
 
 def get_cellid(lat, long):
     origin = CellId.from_lat_lng(LatLng.from_degrees(lat, long)).parent(15)
@@ -88,6 +90,7 @@ def init_config():
     parser.add_argument("-s", "--slack_token", help="Slack Token", required=required("slack_token"))
     parser.add_argument("-y", "--latitude", help="Latitude", required=required("latitude"))
     parser.add_argument("-x", "--longitude", help="Longitude", required=required("longitude"))
+    parser.add_argument("-c", "--slack_channel", help="Slack Channel", required=required("slack_channel"))
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
     parser.add_argument("-t", "--test", help="Only parse the specified location", action='store_true')
     parser.set_defaults(DEBUG=False, TEST=False)
@@ -145,14 +148,17 @@ def main():
     print('Response dictionary: \n\r{}'.format(json.dumps(response_dict, indent=2)))
 
     while True:
-        poi = find_poi(api, position[0], position[1])
-        notify_slack(slack_client, poi)
+        try:
+            poi = find_poi(api, position[0], position[1])
+            notify_slack(slack_client, config.slack_channel, poi)
+        except:
+            print "Error"
         time.sleep(5 * 60)
 
 def find_poi(api, lat, lng):
     poi = {'pokemons': {}, 'forts': []}
-    step_size = 0.0002
-    step_limit = 15
+    step_size = 0.0001
+    step_limit = 8
     coords = generate_spiral(lat, lng, step_size, step_limit)
     timestamp = int(round(time.time() * 1000))
     for coord in coords:
@@ -209,7 +215,7 @@ def generate_spiral(starting_lat, starting_lng, step_size, step_limit):
         m = m + 1
     return coords
 
-def notify_slack(slack_client, poi):
+def notify_slack(slack_client, channel, poi):
     print('POI dictionary: \n\r{}'.format(json.dumps(poi, indent=2)))
     pokemons = poi["pokemons"]
 
@@ -217,9 +223,19 @@ def notify_slack(slack_client, poi):
         if key not in previous_spawn:
             previous_spawn.append(key)
             pokemon = pokemons[key]
-            text = "Pokemon " + str(pokemon["pokemon_data"]["pokemon_id"]) + " spawned!"
-            slack_client.api_call("chat.postMessage", channel="@rifqi", 
+            name = get_name(pokemon["pokemon_data"]["pokemon_id"])
+            text = "Wild " + name.upper() + " appeared!"
+            slack_client.api_call("chat.postMessage", channel=channel, 
                 text=text, as_user=False)
+
+def get_name(poke_id):
+    if (poke_id in pokemon_names): 
+        return pokemon_names[poke_id]
+    response = requests.get('http://pokeapi.co/api/v2/pokemon/' + str(poke_id))
+    pokemon = response.json()
+    name = pokemon["forms"][0]["name"]
+    pokemon_names[poke_id] = name
+    return name
 
 if __name__ == '__main__':
     main()

@@ -4,5 +4,6 @@
     "password": "password11!!",
     "latitude": 0.0,
     "longitude": 0.0,
-    "slack_token": "xoxb-1234567890qwertyuiop"
+    "slack_token": "xoxb-1234567890qwertyuiop",
+    "slack_channel": "#general"
 }
