@@ -226,7 +226,7 @@ def notify_slack(slack_client, channel, poi):
             name = get_name(pokemon["pokemon_data"]["pokemon_id"])
             text = "Wild " + name.upper() + " appeared!"
             slack_client.api_call("chat.postMessage", channel=channel, 
-                text=text, as_user=False)
+                text=text, as_user=True)
 
 def get_name(poke_id):
     if (poke_id in pokemon_names): 
