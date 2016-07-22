@@ -157,8 +157,8 @@ def main():
 
 def find_poi(api, lat, lng):
     poi = {'pokemons': {}, 'forts': []}
-    step_size = 0.0001
-    step_limit = 8
+    step_size = 0.00001
+    step_limit = 10
     coords = generate_spiral(lat, lng, step_size, step_limit)
     timestamp = int(round(time.time() * 1000))
     for coord in coords:
@@ -195,7 +195,7 @@ def generate_spiral(starting_lat, starting_lng, step_size, step_limit):
     coords = [{'lat': starting_lat, 'lng': starting_lng}]
     steps,x,y,d,m = 1, 0, 0, 1, 1
     rlow = 0.0
-    rhigh = 0.0005
+    rhigh = 0.0003
 
     while steps < step_limit:
         while 2 * x * d < m and steps < step_limit:
