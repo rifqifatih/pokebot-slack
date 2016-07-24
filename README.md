@@ -7,7 +7,7 @@ Forked from https://github.com/tejado.
  
 ## Usage
 
-    python pokenear.py
+    python pokeslack.py
 
 ## Requirements
  * Python 2 or 3
