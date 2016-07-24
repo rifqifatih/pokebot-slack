@@ -148,11 +148,8 @@ def main():
     print('Response dictionary: \n\r{}'.format(json.dumps(response_dict, indent=2)))
 
     while True:
-        try:
-            poi = find_poi(api, position[0], position[1])
-            notify_slack(slack_client, config.slack_channel, poi)
-        except:
-            print "Error"
+        poi = find_poi(api, position[0], position[1])
+        notify_slack(slack_client, config.slack_channel, poi)
         time.sleep(5 * 60)
 
 def find_poi(api, lat, lng):
@@ -220,8 +217,9 @@ def notify_slack(slack_client, channel, poi):
     pokemons = poi["pokemons"]
 
     for key in pokemons:
-        if key not in previous_spawn:
-            previous_spawn.append(key)
+        encounter_id = pokemons[key]["encounter_id"]
+        if encounter_id not in previous_spawn:
+            previous_spawn.append(encounter_id)
             pokemon = pokemons[key]
             name = get_name(pokemon["pokemon_data"]["pokemon_id"])
             text = "Wild " + name.upper() + " appeared!"
@@ -238,4 +236,8 @@ def get_name(poke_id):
     return name
 
 if __name__ == '__main__':
-    main()
+    while True:
+        try:
+            main()
+        except KeyboardInterrupt:
+            sys.exit() 
