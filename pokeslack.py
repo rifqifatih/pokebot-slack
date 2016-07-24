@@ -50,21 +50,19 @@ log = logging.getLogger(__name__)
 previous_spawn = []
 pokemon_names = {}
 
-def get_cellid(lat, long):
+def get_cell_ids(lat, long, radius=10):
     origin = CellId.from_lat_lng(LatLng.from_degrees(lat, long)).parent(15)
     walk = [origin.id()]
+    right = origin.next()
+    left = origin.prev()
 
-    # 10 before and 10 after
-    next = origin.next()
-    prev = origin.prev()
-    for i in range(10):
-        walk.append(prev.id())
-        walk.append(next.id())
-        next = next.next()
-        prev = prev.prev()
+    for i in range(radius):
+        walk.append(right.id())
+        walk.append(left.id())
+        right = right.next()
+        left = left.prev()
 
-    # return ''.join(map(encode, sorted(walk)))
-    return origin.id()
+    return sorted(walk)
 
 def encode(cellid):
     output = []
@@ -157,14 +155,14 @@ def find_poi(api, lat, lng):
     step_size = 0.00001
     step_limit = 10
     coords = generate_spiral(lat, lng, step_size, step_limit)
-    timestamp = int(round(time.time() * 1000))
     for coord in coords:
         lat = coord['lat']
         lng = coord['lng']
         api.set_position(lat, lng, 0)
 
-        cellid = get_cellid(lat, lng)
-        api.get_map_objects(latitude=f2i(lat), longitude=f2i(lng), since_timestamp_ms=timestamp, cell_id=cellid)
+        cell_ids = get_cell_ids(lat, lng)
+        timestamps = [0,] * len(cell_ids)
+        api.get_map_objects(latitude=f2i(lat), longitude=f2i(lng), since_timestamp_ms=timestamps, cell_id=cell_ids)
 
         response_dict = api.call()
         if response_dict['responses']['GET_MAP_OBJECTS']['status'] == 1:
