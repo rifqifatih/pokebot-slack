@@ -1,5 +1,5 @@
 # pokebot-slack - pokemon go slack notification
-Forked from https://github.com/tejado.
+Cloned from https://github.com/tejado.
 
 ## Installation
 
